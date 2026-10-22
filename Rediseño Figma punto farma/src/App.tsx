@@ -64,13 +64,14 @@ function Icon({ name, className = "" }: { name: IconName; className?: string }) 
 /* Coloca las capturas en public/capturas/ con los nombres indicados en src.
    Mientras no exista el archivo, muestra el placeholder con borde punteado. */
 function StepMedia({ src, alt }: { src: string; alt: string }) {
+  const resolvedSrc = import.meta.env.BASE_URL + src.replace(/^\//, '')
   const [loaded, setLoaded] = useState(false)
   const [error,  setError]  = useState(false)
   return (
     <div className={`modal-media-slot${loaded ? " media-loaded" : ""}`}>
       {!error && (
         <img
-          src={src} alt={alt}
+          src={resolvedSrc} alt={alt}
           className="modal-media-img"
           style={{ display: loaded ? "block" : "none" }}
           onLoad={() => setLoaded(true)}
