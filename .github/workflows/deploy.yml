@@ -26,19 +26,20 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
-        working-directory: "Rediseño Figma punto farma"
-        run: npm install
+      - name: Install and build
+        run: |
+          cd "Rediseño Figma punto farma"
+          npm ci
+          npm run build
 
-      - name: Build
-        working-directory: "Rediseño Figma punto farma"
-        run: npm run build
+      - name: Copy dist to clean path
+        run: cp -r "Rediseño Figma punto farma/dist" ./site
 
       - uses: actions/configure-pages@v4
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: "Rediseño Figma punto farma/dist"
+          path: ./site
 
       - id: deployment
         uses: actions/deploy-pages@v4
