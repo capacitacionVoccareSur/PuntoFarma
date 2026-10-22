@@ -115,7 +115,7 @@ export default function App() {
       <header className="site-header">
         <div className="header-inner">
           <a className="brand" href="#" aria-label="Punto Farma">
-            <img src="/logo.png" alt="Punto Farma" className="brand-logo" />
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Punto Farma" className="brand-logo" />
           </a>
           <div className="header-divider" />
           <span className="header-subtitle">Información importante para gestión diaria</span>
