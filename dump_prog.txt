@@ -1,0 +1,528 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Punto Farma · Panel de Gestión</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.177.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.177.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --azul:#132a68;--azul2:#19499c;--celeste:#00a9e4;--dorado:#b48c24;
+      --violeta:#7838d0;--violeta-s:#f3edff;
+      --verde:#079968;--verde-bg:#e7f8f1;
+      --fondo:#f0f4fb;--texto:#17233c;--gris:#6d788b;
+      --borde:#dfe7f2;--blanco:#fff;
+      --sh:0 4px 24px rgba(19,42,104,.07);
+      --sh-lg:0 10px 40px rgba(19,42,104,.13);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',system-ui,sans-serif;background:var(--fondo);color:var(--texto);min-height:100vh}
+
+    /* ── HEADER ── */
+    .header{background:linear-gradient(135deg,#0085b8,#00a9e4,#00bfef);padding:0 22px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,80,140,.3)}
+    .header-inner{max-width:1400px;margin:auto;height:42px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .brand{display:flex;align-items:center;gap:14px}
+    .brand img{height:30px;width:auto;display:block}
+    .brand-text h1{color:#fff;font-size:14px;font-weight:800;letter-spacing:-.2px}
+    .brand-text p{color:rgba(255,255,255,.45);font-size:10px;margin-top:0}
+    .header-right{display:flex;align-items:center;gap:16px}
+    .live-clock{text-align:right;color:#fff}
+    .clock-time{font-size:20px;font-weight:800;letter-spacing:-.5px;font-feature-settings:"tnum"}
+    .clock-date{font-size:11px;color:rgba(255,255,255,.45);margin-top:1px}
+    .badge{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:8px;padding:5px 12px;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;gap:7px}
+    .online-dot{width:7px;height:7px;border-radius:50%;background:#34d399;flex-shrink:0;animation:pdot 2s ease-in-out infinite}
+    @keyframes pdot{0%,100%{opacity:1}50%{opacity:.35}}
+
+    /* ── BENTO ── */
+    .main{max-width:1400px;margin:5px auto;padding:0 12px 8px}
+    .bento{display:grid;grid-template-columns:repeat(12,1fr);gap:7px;grid-auto-flow:dense}
+
+    /* ── CARD BASE ── */
+    .card{background:#fff;border-radius:12px;border:1px solid #e8eef8;box-shadow:var(--sh);padding:10px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+    .card:hover{transform:translateY(-2px);box-shadow:var(--sh-lg)}
+
+    /* card-head: icon canvas + title block */
+    .card-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+    .icon-3d{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:block}
+    .c-label{font-size:8.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--gris);margin-bottom:3px;display:block}
+    .c-title{font-size:13.5px;font-weight:800;color:var(--azul)}
+
+    /* ── BTN ── */
+    .btn{display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:700;transition:all .18s;font-family:inherit;text-decoration:none;white-space:nowrap}
+    .btn:hover{transform:translateY(-1px)}
+    .btn-primary{background:#00a9e4;color:#fff}.btn-primary:hover{background:#0090c8}
+    .btn-azul{background:var(--azul);color:#fff}.btn-azul:hover{background:#0f2054}
+    .btn-violeta{background:var(--violeta);color:#fff}.btn-violeta:hover{background:#6428b8}
+    .btn-amber{background:#fbbf24;color:#78350f}.btn-amber:hover{background:#f59e0b}
+    .btn-sm{padding:4px 10px;font-size:11px}
+    .btn-full{width:100%;justify-content:center}
+
+    /* ── SPEECH card (azul, 4×2) ── */
+    .c-speech{grid-column:span 6;grid-row:span 2;background:linear-gradient(150deg,#013e5e,#00618a,#00a9e4);border-color:transparent}
+    .c-speech .c-label{color:rgba(255,255,255,.72)}
+    .c-speech .c-title{color:#fff;font-size:15px}
+    .c-speech .icon-3d{background:rgba(255,255,255,.06)}
+    .speech-bubble{background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:11px 14px;font-size:13px;line-height:1.65;color:rgba(255,255,255,.88);font-style:italic;margin-bottom:16px}
+    .speech-bubble strong{color:#67d8f7 !important;font-style:normal}
+    .speech-steps{display:flex;flex-direction:column;gap:3px}
+    .s-step{display:flex;align-items:flex-start;gap:8px;font-size:11.5px;color:rgba(255,255,255,.92)}
+    .s-num{width:16px;height:16px;border-radius:50%;flex-shrink:0;margin-top:1px;background:rgba(24,169,224,.2);border:1px solid rgba(24,169,224,.35);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#67d8f7}
+
+    /* ── SOA card (violeta, 4×1) ── */
+
+    /* ── LINKS card (verde, 4×1) ── */
+    .c-links{grid-column:span 6;background:linear-gradient(135deg,#e7f8f1,#d4f4e8);border-color:#a7e5ce}
+    .c-links .c-label{color:var(--verde)}
+    .c-links .c-title{color:#065f46}
+    .links-list{display:flex;flex-direction:column;gap:4px}
+    .link-row{display:flex;justify-content:space-between;align-items:center;padding:5px 10px;background:rgba(255,255,255,.65);border:1px solid rgba(7,153,104,.18);border-radius:10px;text-decoration:none;color:#065f46;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .18s;width:100%;text-align:left}
+    .link-row:hover{background:rgba(255,255,255,.92);transform:translateX(3px);border-color:var(--verde)}
+    .link-row span{color:var(--verde);font-weight:800;font-size:15px}
+
+    /* ── DATOS card (amber, 4×1) ── */
+    .datos-list{display:flex;flex-direction:column;gap:5px}
+
+    /* ── ESPECIALIDADES card (blanco, 4×2) ── */
+    .c-espec{grid-column:span 6;grid-row:span 2}
+    .espec-table{width:100%;border-collapse:collapse;margin-top:4px}
+    .espec-table th{text-align:left;font-size:10px;color:var(--gris);font-weight:600;padding:0 0 7px;border-bottom:1px solid var(--borde)}
+    .espec-table td{padding:3px 0;font-size:11.5px;border-bottom:1px solid #f0f4fb;vertical-align:middle}
+    .espec-table tr:last-child td{border-bottom:none}
+    .espec-nombre{color:var(--azul);font-weight:600}
+    .badge-pill{background:var(--violeta-s);color:var(--violeta);font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px}
+
+    /* ── PROGRAMAS card (blanco, 4×1) ── */
+    .c-prog{grid-column:span 4}
+    .prog-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+    .prog-card{border-radius:9px;padding:8px}
+    .prog-base{background:linear-gradient(135deg,#e8f2ff,#dbeafe);border:1px solid #93c5fd}
+    .prog-full{background:linear-gradient(135deg,#f3edff,#ede4ff);border:1px solid #c4b5fd}
+    .prog-tag{display:inline-block;font-size:8px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:1px 6px;border-radius:20px;margin-bottom:4px}
+    .prog-base .prog-tag{background:#1e40af;color:#fff}
+    .prog-full .prog-tag{background:var(--violeta);color:#fff}
+    .prog-name{font-size:11px;font-weight:800;margin-bottom:4px}
+    .prog-base .prog-name{color:#1e40af}
+    .prog-full .prog-name{color:var(--violeta)}
+    .prog-features{display:flex;flex-direction:column;gap:5px}
+    .prog-feature{font-size:10.5px;color:#374151;display:flex;align-items:center;gap:5px}
+    .prog-base .prog-feature::before{content:"✓";color:#1e40af;font-weight:800}
+    .prog-full .prog-feature::before{content:"✓";color:var(--violeta);font-weight:800}
+
+    /* ── DISPONIBILIDAD card (azul, 4×1) ── */
+    .c-disp{grid-column:span 4;background:linear-gradient(135deg,#0085b8,#00a9e4);border-color:transparent}
+    .c-disp .c-label{color:rgba(255,255,255,.72)}
+    .c-disp .c-title{color:#fff;font-size:14px}
+    .c-disp .icon-3d{background:rgba(255,255,255,.06)}
+    .disp-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:7px}
+    .disp-stat{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);border-radius:7px;padding:6px;text-align:center}
+    .stat-num{font-size:19px;font-weight:900;color:#fff}
+    .stat-num.g{color:#34d399}.stat-num.c{color:#67e8f9}.stat-num.v{color:#c084fc}
+    .stat-label{font-size:9px;color:rgba(255,255,255,.45);margin-top:1px}
+    .disp-desc{color:rgba(255,255,255,.5);font-size:10.5px;margin-bottom:7px}
+
+    /* ── RECORDATORIOS card (naranja, 4×1) ── */
+    .c-rec{grid-column:span 6;background:linear-gradient(135deg,#fff7f0,#ffede0);border-color:#fdba74}
+    .c-rec .c-label{color:#c2410c}
+    .c-rec .c-title{color:#9a3412}
+    .rec-list{display:flex;flex-direction:column;gap:4px}
+    .rec-item{background:rgba(255,255,255,.62);border-left:3px solid #f97316;border-radius:0 7px 7px 0;padding:4px 10px;font-size:11px;color:#7c2d12;font-weight:500}
+    .rec-item strong{color:#c2410c}
+
+    /* ── MADRUGADA card (indigo, 4×1) ── */
+    .c-mad{grid-column:span 6;background:linear-gradient(135deg,#1e1b4b,#2d2a7a);border-color:transparent}
+    .c-mad .c-label{color:rgba(255,255,255,.72)}
+    .c-mad .c-title{color:#e0e7ff;font-size:13px}
+    .c-mad .icon-3d{background:rgba(255,255,255,.05)}
+    .mad-items{display:flex;flex-direction:column;gap:4px}
+    .mad-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:8px;padding:5px 9px;font-size:11px;color:rgba(255,255,255,.8)}
+    .mad-item strong{color:#a5b4fc;display:block;margin-bottom:1px;font-size:10px}
+
+    /* ── MODALES ── */
+    .overlay{position:fixed;inset:0;background:rgba(10,20,50,.55);backdrop-filter:blur(8px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .28s}
+    .overlay.open{opacity:1;pointer-events:all}
+    .modal{background:#fff;border-radius:24px;width:100%;max-width:620px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.22);transform:translateY(18px) scale(.97);transition:transform .28s}
+    .overlay.open .modal{transform:translateY(0) scale(1)}
+    .m-head{padding:14px 20px 10px;border-bottom:1px solid var(--borde);display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;background:#fff;z-index:10;border-radius:24px 24px 0 0}
+    .m-title{font-size:17px;font-weight:800;color:var(--azul)}
+    .m-close{width:34px;height:34px;background:var(--fondo);border:1px solid var(--borde);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--gris);transition:all .18s;font-family:inherit}
+    .m-close:hover{background:#fee2e2;border-color:#fca5a5;color:#dc2626}
+    .m-body{padding:16px 20px 20px}
+    .m-sec{margin-bottom:14px}.m-sec:last-child{margin-bottom:0}
+    .m-sec-title{font-size:12px;font-weight:800;color:var(--azul);text-transform:uppercase;letter-spacing:.9px;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--borde)}
+    .m-speech{background:linear-gradient(135deg,#f0f6ff,#e8f2ff);border:1px solid #bdd7f8;border-radius:14px;padding:17px 19px;font-size:14.5px;line-height:1.7;color:var(--azul);font-style:italic}
+    .m-speech strong{font-style:normal;color:var(--celeste)}
+    .m-step{display:flex;gap:13px;margin-bottom:13px}
+    .m-step-n{width:28px;height:28px;background:var(--azul);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;margin-top:1px}
+    .m-step-c strong{display:block;font-size:13.5px;color:var(--azul);margin-bottom:2px}
+    .m-step-c p{font-size:12.5px;color:var(--gris);line-height:1.5}
+    .m-alert{background:#fef3c7;border:1px solid #fbbf24;border-radius:12px;padding:13px 15px;font-size:13px;color:#92400e;font-weight:600;display:flex;gap:9px;align-items:flex-start}
+    .m-info{background:#f0f6ff;border:1px solid #bdd7f8;border-radius:12px;padding:13px 15px;font-size:13px;color:#1e40af;display:flex;gap:9px;align-items:flex-start}
+    .m-table{width:100%;border-collapse:collapse;font-size:13px}
+    .m-table th{text-align:left;font-size:11px;font-weight:700;color:var(--gris);letter-spacing:.4px;padding:0 0 7px;border-bottom:1px solid var(--borde)}
+    .m-table td{padding:8px 8px 8px 0;border-bottom:1px solid #f0f4fb;vertical-align:middle}
+    .m-table tr:last-child td{border-bottom:none}
+    .tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+    .tag-a{background:var(--violeta-s);color:var(--violeta)}
+    .tag-v{background:var(--verde-bg);color:var(--verde)}
+    .tag-b{background:#e8f2ff;color:#1761ce}
+    .tag-o{background:#fff7ed;color:#c2410c}
+    .checklist{display:flex;flex-direction:column;gap:8px}
+    .check-item{display:flex;align-items:center;gap:11px;padding:10px 13px;background:var(--fondo);border-radius:10px;font-size:13.5px;color:var(--texto);border:1px solid var(--borde);cursor:pointer}
+    .check-item input[type=checkbox]{width:17px;height:17px;accent-color:var(--verde);cursor:pointer;flex-shrink:0}
+    .modal::-webkit-scrollbar{width:4px}
+    .modal::-webkit-scrollbar-thumb{background:var(--borde);border-radius:99px}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:1100px){.c-speech,.c-links,.c-espec,.c-prog,.c-disp,.c-rec,.c-mad{grid-column:span 6}}
+    @media(max-width:700px){
+      .main{padding:0 12px 30px;margin-top:14px}
+      .bento{grid-template-columns:1fr;gap:12px;grid-auto-flow:dense}
+      .c-speech,.c-links,.c-espec,.c-prog,.c-disp,.c-rec,.c-mad{grid-column:1;grid-row:auto}
+      .live-clock{display:none}
+      .prog-grid{grid-template-columns:1fr}
+    }
+
+    /* speech sections */
+    .speech-sec{margin-top:8px}
+    .speech-sec-title{font-size:9px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#67d8f7;margin-bottom:5px;padding-bottom:3px;border-bottom:2px solid rgba(103,216,247,.25);display:flex;align-items:center;gap:6px}
+    .speech-sec-title::before{content:"";display:inline-block;width:3px;height:9px;background:#67d8f7;border-radius:2px;flex-shrink:0}
+    .speech-q-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:1px}
+    .speech-q-item{background:rgba(255,255,255,.13);border-radius:6px;padding:4px 8px;font-size:10.5px;color:rgba(255,255,255,.95);font-weight:500;border-left:3px solid rgba(103,216,247,.5)}
+    .s-step-warn{background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.35);border-radius:7px;padding:3px 8px;margin:1px 0}
+    .s-num-warn{background:rgba(251,191,36,.35) !important;border-color:rgba(251,191,36,.6) !important;color:#fde68a !important}
+    .speech-bubble strong{color:#67d8f7 !important;font-style:normal}
+
+
+    button,[onclick],a{cursor:pointer}
+    .espec-nombre{position:relative}
+    .espec-nombre[data-tip]:hover::after{content:attr(data-tip);position:absolute;left:0;top:calc(100% + 4px);z-index:99;background:#0f2050;color:#fff;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:400;white-space:nowrap;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);line-height:1.4}
+    .espec-nombre[data-tip]:hover::before{content:"";position:absolute;left:10px;top:calc(100% + 1px);border:4px solid transparent;border-bottom-color:#0f2050;z-index:100;pointer-events:none}
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="brand">
+      <img src="BASE64" alt="Punto Farma">
+      <div class="brand-text">
+        <h1>Punto Farma · Panel de Gestión</h1>
+        <p>Programa Punto Salud · Coberturas médicas virtuales</p>
+  </div>
+</header>
+
+<main class="main">
+<div class="bento">
+
+  <!-- ① SPEECH -->
+  <div class="card c-speech">
+    <div class="card-head">
+      <canvas class="icon-3d" id="i-speech"></canvas>
+      <div>
+        <span class="c-label">Script + Guía de atención</span>
+        <div class="c-title">Speech de Bienvenida</div>
+      </div>
+    </div>
+    <div class="speech-bubble">
+      &#8220;<strong>Buenos días / buenas tardes / buenas noches.</strong><br>
+      Le saluda <em>(Nombre del Coordinador)</em> del Programa <strong>Punto Salud</strong>.<br>
+      &#191;Cómo le podemos ayudar?&#8221;
+    </div>
+    <div class="speech-sec">
+      <div class="speech-sec-title">Validación y registro</div>
+      <div class="speech-steps">
+        <div class="s-step"><div class="s-num">1</div><span>Solicitar número de <strong>cédula</strong> del paciente &#8212; solo titular</span></div>
+        <div class="s-step"><div class="s-num">2</div><span>Validar en <strong>SOA</strong> &#8212; si no valida: crear manual y escalar</span></div>
+        <div class="s-step s-step-warn"><div class="s-num s-num-warn">!</div><span><strong>Crear expediente</strong> con dirección <strong>Central&#160;/&#160;Asunción</strong> en entidades&#160;1&#160;y&#160;2</span></div>
+        <div class="s-step"><div class="s-num">3</div><span>Teléfono siempre con prefijo <strong>09....</strong></span></div>
+      </div>
+    </div>
+    <div class="speech-sec">
+      <div class="speech-sec-title">Preguntas obligatorias</div>
+      <div class="speech-q-grid">
+        <div class="speech-q-item">&#191;Nombre completo?</div>
+        <div class="speech-q-item">&#191;Teléfono (con 09....)?</div>
+        <div class="speech-q-item">&#191;Edad?</div>
+        <div class="speech-q-item">&#191;Sexo?</div>
+        <div class="speech-q-item">&#191;Motivo de consulta?</div>
+        <div class="speech-q-item">&#191;Especialidad?</div>
+        <div class="speech-q-item">&#191;Correo electrónico?</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card c-links">
+    <div class="card-head">
+      <canvas class="icon-3d" id="i-links"></canvas>
+      <div>
+        <span class="c-label">Links rápidos</span>
+        
+      </div>
+    </div>
+    <div class="links-list">
+      <a href="https://puntofarma.medicaia.com/" target="_blank" class="link-row">Medicaia.com <span>&#8594;</span></a>
+      <a href="https://script.google.com/a/macros/voccare.global/s/AKfycbxwC1FTajfuA0ExsU5SCkbatU9yHzELzZ4nO4WG1rpX93FlM_EUiTHKGrCU3v10mtri/exec" target="_blank" class="link-row">Costos Exactos por Consulta <span>&#8594;</span></a>
+      <button class="link-row" onclick="openModal('m-checklist')">Preguntas Obligatorias <span>&#8594;</span></button>
+      <button class="link-row" onclick="openModal('m-prog')">Comparaci&#243;n de Programas <span>&#8594;</span></button>
+      <button class="link-row" onclick="openModal('m-espec')">Todas las Especialidades <span>&#8594;</span></button>
+    </div>
+  </div>
+
+  <!-- ④ DATOS PACIENTE -->
+
+  <div class="card c-espec">
+    <div class="card-head">
+      <canvas class="icon-3d" id="i-espec"></canvas>
+      <div>
+        <span class="c-label">Coberturas disponibles</span>
+        <div class="c-title">Especialidades y Costos</div>
+      </div>
+    </div>
+    <table class="espec-table">
+      <thead><tr><th>Especialidad</th><th style="text-align:right">Costo (Gs.)</th></tr></thead>
+      <tbody>
+        <tr><td class="espec-nombre" data-tip="Consultas generales, diagnóstico y tratamiento">Medicina General</td><td style="text-align:right"><span class="badge-pill">70–80k</span></td></tr>
+        <tr><td class="espec-nombre" data-tip="Atención médica para niños y adolescentes">Pediatría</td><td style="text-align:right"><span class="badge-pill">70–80k</span></td></tr>
+        <tr><td class="espec-nombre" data-tip="Evaluación y planes nutricionales personalizados">Nutrición</td><td style="text-align:right"><span class="badge-pill">70k</span></td></tr>
+        <tr><td class="espec-nombre" data-tip="Salud visual y enfermedades oculares">Oftalmología</td><td style="text-align:right"><span class="badge-pill">70k</span></td></tr>
+        <tr><td class="espec-nombre" data-tip="Salud femenina y sistema reproductivo">Ginecología</td><td style="text-align:right"><span class="badge-pill">80–100k</span></td></tr>
+        <tr><td class="espec-nombre" data-tip="Enfermedades del sistema digestivo">Gastroenterología</td><td style="text-align:right"><span class="badge-pill">100k</span></td></tr>
+        <tr><td class="espec-nombre" data-tip="Enfermedades del corazón y sistema circulatorio">Cardiología</td><td style="text-align:right"><span class="badge-pill">100k</span></td></tr>
+        <tr><td class="espec-nombre" data-tip="Atención especializada para adultos mayores">Geriatría</td><td style="text-align:right"><span class="badge-pill">100k</span></td></tr>
+        <tr><td class="espec-nombre" data-tip="Enfermedades del sistema urinario y renal">Urología</td><td style="text-align:right"><span class="badge-pill">100–120k</span></td></tr>
+        <tr><td class="espec-nombre" data-tip="Lesiones musculoesqueléticas y ortopedia">Traumatología</td><td style="text-align:right"><span class="badge-pill">100–130k</span></td></tr>
+        <tr><td class="espec-nombre" data-tip="Salud mental y bienestar emocional">Psicología</td><td style="text-align:right"><span class="badge-pill">70–130k</span></td></tr>
+      </tbody>
+    </table>
+    <a href="https://script.google.com/a/macros/voccare.global/s/AKfycbxwC1FTajfuA0ExsU5SCkbatU9yHzELzZ4nO4WG1rpX93FlM_EUiTHKGrCU3v10mtri/exec" target="_blank" class="btn btn-violeta btn-sm btn-full" style="margin-top:14px">Ver tabla completa</a>
+  </div>
+
+  <!-- ⑥ PROGRAMAS -->
+  <div class="card c-prog">
+    <div class="card-head">
+      <canvas class="icon-3d" id="i-prog"></canvas>
+      <div>
+        <span class="c-label">Planes de cobertura</span>
+        <div class="c-title">Programas Disponibles</div>
+      </div>
+    </div>
+    <div class="prog-grid">
+      <div class="prog-card prog-base">
+        <div class="prog-tag">Estándar</div>
+        <div class="prog-name">Programa Base</div>
+        <div class="prog-features">
+          <div class="prog-feature">Med. General + Especialistas</div>
+          <div class="prog-feature">Segunda Opinión Médica</div>
+          <div class="prog-feature">Orientación Tel. + Recordatorios</div>
+          <div class="prog-feature">Coordinación de Citas</div>
+        </div>
+      </div>
+      <div class="prog-card prog-full">
+        <div class="prog-tag">Premium</div>
+        <div class="prog-name">Programa Full</div>
+        <div class="prog-features">
+          <div class="prog-feature">Todo lo del Base</div>
+          <div class="prog-feature">+ Nutrición (3 servicios)</div>
+          <div class="prog-feature">Crónicas Â· Infantil Â· Peso</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-azul btn-sm btn-full" style="margin-top:10px" onclick="openModal('m-prog')">Comparar programas</button>
+  </div>
+
+<div class="overlay" id="m-prog">
+  <div class="modal" style="max-width:740px">
+    <div class="m-head"><div class="m-title">Comparación de Programas</div><button class="m-close" onclick="closeModal('m-prog')">&#10005;</button></div>
+    <div class="m-body">
+      <table class="m-table" style="font-size:12px">
+        <thead>
+          <tr>
+            <th style="width:44%">Servicio</th>
+            <th style="width:9%;text-align:center">Base</th>
+            <th style="width:9%;text-align:center">Full</th>
+            <th>Límite</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Medicina General</strong><br><span style="font-size:10px;color:var(--gris)">Orientación, síntomas, seguimiento, derivación</span></td>
+            <td style="text-align:center;color:#059669;font-weight:800">&#10003;</td>
+            <td style="text-align:center;color:#059669;font-weight:800">&#10003;</td>
+            <td style="font-size:11px">1&#160;/&#160;vigencia&#160;Â·&#160;30&#160;min</td>
+          </tr>
+          <tr>
+            <td><strong>Telemedicina con Especialistas</strong><br><span style="font-size:10px;color:var(--gris)">Urología&#160;Â·&#160;Gastro&#160;Â·&#160;Cardiología&#160;Â·&#160;Ginecología&#160;Â·&#160;Oftalmología&#160;Â·&#160;Pediatría&#160;Â·&#160;Psicología&#160;Â·&#160;Traumatología&#160;Â·&#160;Geriatría</span></td>
+            <td style="text-align:center;color:#059669;font-weight:800">&#10003;</td>
+            <td style="text-align:center;color:#059669;font-weight:800">&#10003;</td>
+            <td style="font-size:11px">1&#160;/&#160;vigencia&#160;Â·&#160;30&#160;min</td>
+          </tr>
+          <tr style="background:linear-gradient(90deg,#f5f0ff,#faf7ff)">
+            <td><strong style="color:var(--violeta)">Nutrición â€” Diabetes y Enf. Crónicas</strong><br><span style="font-size:10px;color:var(--gris)">Hipertensión, colesterol, obesidad y enfermedades crónicas</span></td>
+            <td style="text-align:center;color:#d1d5db;font-size:16px">&#8212;</td>
+            <td style="text-align:center;color:var(--violeta);font-weight:800">&#10003;</td>
+            <td style="font-size:11px">1&#160;/&#160;vigencia&#160;Â·&#160;30&#160;min</td>
+          </tr>
+          <tr style="background:linear-gradient(90deg,#f5f0ff,#faf7ff)">
+            <td><strong style="color:var(--violeta)">Nutrición Infantil</strong><br><span style="font-size:10px;color:var(--gris)">Bebés, niños y adolescentes, alimentación según etapa</span></td>
+            <td style="text-align:center;color:#d1d5db;font-size:16px">&#8212;</td>
+            <td style="text-align:center;color:var(--violeta);font-weight:800">&#10003;</td>
+            <td style="font-size:11px">1&#160;/&#160;vigencia&#160;Â·&#160;30&#160;min</td>
+          </tr>
+          <tr style="background:linear-gradient(90deg,#f5f0ff,#faf7ff)">
+            <td><strong style="color:var(--violeta)">Nutrición â€” Bajar o subir de peso</strong><br><span style="font-size:10px;color:var(--gris)">Hábitos saludables, objetivos de peso de forma segura</span></td>
+            <td style="text-align:center;color:#d1d5db;font-size:16px">&#8212;</td>
+            <td style="text-align:center;color:var(--violeta);font-weight:800">&#10003;</td>
+            <td style="font-size:11px">1&#160;/&#160;vigencia&#160;Â·&#160;30&#160;min</td>
+          </tr>
+          <tr>
+            <td><strong>Segunda Opinión Médica</strong><br><span style="font-size:10px;color:var(--gris)">Revisión de diagnóstico o tratamiento con documentación médica</span></td>
+            <td style="text-align:center;color:#059669;font-weight:800">&#10003;</td>
+            <td style="text-align:center;color:#059669;font-weight:800">&#10003;</td>
+            <td style="font-size:11px">1&#160;/&#160;vigencia&#160;Â·&#160;30&#160;min</td>
+          </tr>
+          <tr>
+            <td><strong>Recordatorio de Medicamentos</strong><br><span style="font-size:10px;color:var(--gris)">Alertas para cumplimiento de tratamientos</span></td>
+            <td style="text-align:center;color:#059669;font-weight:800">&#10003;</td>
+            <td style="text-align:center;color:#059669;font-weight:800">&#10003;</td>
+            <td style="font-size:11px">Sin límite</td>
+          </tr>
+          <tr>
+            <td><strong>Orientación Médica Telefónica</strong><br><span style="font-size:10px;color:var(--gris)">Triaje telefónico basado en protocolos clínicos</span></td>
+            <td style="text-align:center;color:#059669;font-weight:800">&#10003;</td>
+            <td style="text-align:center;color:#d1d5db;font-size:16px">&#8212;</td>
+            <td style="font-size:11px">Sin límite</td>
+          </tr>
+          <tr>
+            <td><strong>Coordinación de Citas Médicas</strong><br><span style="font-size:10px;color:var(--gris)">Gestión para consultas presenciales o virtuales con la red</span></td>
+            <td style="text-align:center;color:#059669;font-weight:800">&#10003;</td>
+            <td style="text-align:center;color:#059669;font-weight:800">&#10003;</td>
+            <td style="font-size:11px">Sin límite</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="m-info" style="margin-top:12px">&#8505; <span>La diferencia clave del <strong>Programa Full</strong> son los 3 servicios de Nutrición especializados no disponibles en Base.</span></div>
+    </div>
+  </div>
+</div>
+        </div>
+        <div class="prog-card prog-full" style="padding:18px">
+          <div class="prog-tag">Premium</div>
+          <div class="prog-name" style="font-size:16px;margin-bottom:10px">Programa Full</div>
+          <div class="prog-features" style="gap:8px">
+          <div class="prog-feature">Todo lo del Base</div>
+          <div class="prog-feature">+ Nutrición (3 servicios)</div>
+          <div class="prog-feature">Crónicas, Infantil, Peso</div>
+        </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- THREE.JS 3D ICONS -->
+<script type="module">
+import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+function makeIcon(id, geometry, color, emissive, opts = {}) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(64, 64, false);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 20);
+  camera.position.z = 2.6;
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+  const sun = new THREE.DirectionalLight(0xffffff, 1.8);
+  sun.position.set(3, 5, 3);
+  scene.add(sun);
+  const glow = new THREE.PointLight(emissive, 1.6, 7);
+  glow.position.set(-1.5, -1, 1.5);
+  scene.add(glow);
+  const rim = new THREE.DirectionalLight(0xffffff, 0.35);
+  rim.position.set(-2, 2, -2);
+  scene.add(rim);
+
+  const mat = new THREE.MeshPhysicalMaterial({
+    color,
+    emissive,
+    emissiveIntensity: 0.1,
+    metalness:  opts.metalness  ?? 0.12,
+    roughness:  opts.roughness  ?? 0.05,
+    clearcoat:  opts.clearcoat  ?? 1.0,
+    clearcoatRoughness: 0.08,
+    ...(opts.extra ?? {})
+  });
+
+  const mesh = new THREE.Mesh(geometry, mat);
+  mesh.rotation.x = opts.rx ?? 0.3;
+  mesh.rotation.y = opts.ry ?? 0.4;
+  scene.add(mesh);
+
+  const spd   = opts.speed ?? 0.007;
+  const baseX = opts.rx ?? 0.3;
+  let t = 0;
+
+  renderer.setAnimationLoop(() => {
+    t += 0.016;
+    mesh.rotation.y += spd;
+    mesh.rotation.x = baseX + Math.sin(t * 0.55) * 0.07;
+    renderer.render(scene, camera);
+  });
+}
+
+// 1 Speech — rounded cube, celeste
+makeIcon('i-speech', new RoundedBoxGeometry(1.1,1.1,1.1,4,0.18), 0x18a9e0, 0x0d6389);
+
+// 3 Links — torus knot, verde
+makeIcon('i-links', new THREE.TorusKnotGeometry(0.4,0.13,100,16), 0x079968, 0x047a52,
+  { roughness:0.08 });
+
+// 5 Especialidades — icosahedron, violeta
+makeIcon('i-espec', new THREE.IcosahedronGeometry(0.68,0), 0x7838d0, 0x5a22b8,
+  { metalness:0.4, roughness:0.0 });
+
+// 6 Programas — torus ring, azul
+makeIcon('i-prog', new THREE.TorusGeometry(0.52,0.22,18,60), 0x19499c, 0x132a68,
+  { metalness:0.3, roughness:0.1, rx:0.4 });
+
+// 7 Disponibilidad — sphere iridescent, celeste
+makeIcon('i-disp', new THREE.SphereGeometry(0.66,32,32), 0x18a9e0, 0x0d6389,
+  { metalness:0.05, roughness:0.0, extra:{ iridescence:0.65, iridescenceIOR:1.5 } });
+
+// 8 Recordatorios — hexagonal cone, naranja
+makeIcon('i-rec', new THREE.ConeGeometry(0.58,1.0,6), 0xf97316, 0xea6b0c,
+  { metalness:0.05, roughness:0.2, clearcoat:0.6, rx:-0.2, ry:0.3 });
+
+// 9 Madrugada — thin torus ring, indigo
+makeIcon('i-mad', new THREE.TorusGeometry(0.52,0.13,12,60), 0x818cf8, 0x6366f1,
+  { metalness:0.5, roughness:0.0, rx:0.8, speed:0.005 });
+</script>
+
+<!-- CLOCK + MODALS -->
+<script>
+function openModal(id){ document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+document.querySelectorAll('.overlay').forEach(o=>{
+  o.addEventListener('click',e=>{ if(e.target===o){ o.classList.remove('open'); document.body.style.overflow=''; }});
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') document.querySelectorAll('.overlay.open').forEach(o=>{ o.classList.remove('open'); document.body.style.overflow=''; });
+});
+</script>
+</body>
+</html>
