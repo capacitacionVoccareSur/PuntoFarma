@@ -355,6 +355,15 @@ export default function App() {
               Página de costos y horarios de médicos
               <Icon name="external" />
             </a>
+            <a
+              href="https://drive.google.com/file/d/15mCK3SNRy4B36DeoFcYo5pQhEWuGHFWR/view"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="link-item"
+            >
+              Guía para ingreso a consulta médica (Paciente)
+              <Icon name="external" />
+            </a>
           </nav>
         </article>
 
