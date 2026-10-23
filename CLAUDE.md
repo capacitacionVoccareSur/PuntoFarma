@@ -104,7 +104,18 @@ Screenshots: `public/Asignación Medicaia/1.png` … `public/Asignación Medicai
 
 **Numbers:** All step and question numbers display without leading zeros (1, 2, 3… not 01, 02, 03).
 
-**Logo** — expects `/logo.png` in the public folder (currently missing; causes broken image in dev).
+**Logo** — `public/logo.png` (present). Referenced with `` src={`${import.meta.env.BASE_URL}logo.png`} `` to work on GitHub Pages.
+
+**Favicon** — `public/favicon.svg`: white cross on blue (`#2c4ca2`) rounded square. Linked in `index.html` as `<link rel="icon" type="image/svg+xml" href="/favicon.svg" />` (Vite auto-prefixes base path on build).
+
+## GitHub Pages Deployment
+
+- Live URL: `https://capacitacionvoccaresur.github.io/PuntoFarma/`
+- Repo: `https://github.com/capacitacionVoccareSur/PuntoFarma`
+- Auto-deploy via `.github/workflows/deploy.yml` on push to `master`
+- **Requires**: Settings → Pages → Source = **GitHub Actions** (must be set manually once in repo settings)
+- `vite.config.ts` has `base: '/PuntoFarma/'` — all public asset URLs must use `import.meta.env.BASE_URL` prefix
+- Workflow uses `run: cd "Rediseño Figma punto farma" && npm ci && npm run build` (avoids `working-directory` with `ñ` char which fails on Ubuntu runner)
 
 ## Other Files
 
