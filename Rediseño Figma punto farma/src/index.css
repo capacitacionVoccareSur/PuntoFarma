@@ -465,6 +465,58 @@ ol, ul { list-style: none; padding: 0; margin: 0; }
   .speech-layout { grid-template-columns: 1fr; }
 }
 
+@media (max-width: 600px) {
+  /* Header */
+  .brand-logo    { height: 38px; }
+  .header-inner  { padding: 6px 14px; gap: 12px; }
+  .header-subtitle { display: none; }
+
+  /* Grid */
+  .bento-grid { padding: 8px; gap: 6px; border-radius: 18px; }
+
+  /* Card base */
+  .card { padding: 12px 14px; }
+  .card-kicker { font-size: 10px; letter-spacing: 1px; }
+  .card-title  { font-size: 15px; }
+
+  /* Speech */
+  .script-text    { font-size: 13px; }
+  .script-closing { font-size: 17px; }
+  .steps-title    { font-size: 12px; }
+  .step-body h4   { font-size: 13px; }
+  .step-body p    { font-size: 12px; }
+  .notice-inline  { font-size: 12px; }
+
+  /* Preguntas */
+  .questions-header h3 { font-size: 13px; }
+  .questions-list li   { font-size: 13px; }
+  .q-num               { font-size: 11px; width: 20px; }
+  .q-rem-item          { font-size: 12px; }
+
+  /* Especialidades */
+  .spec-row-name { font-size: 12px; }
+  .spec-row-desc { font-size: 10px; }
+  .spec-row-cost { font-size: 12px; }
+
+  /* Programas — apilar planes en 1 col */
+  .prog-plans     { grid-template-columns: 1fr; }
+  .prog-name      { font-size: 14px; }
+  .prog-features li { font-size: 12px; }
+  .prog-link      { font-size: 12px; }
+
+  /* Links */
+  .link-item { font-size: 13px; padding: 10px 13px; }
+
+  /* Modal */
+  .modal-panel   { width: 100vw; height: 100dvh; border-radius: 0; }
+  .modal-header  { padding: 16px 18px 14px; }
+  .modal-title   { font-size: 16px; }
+  .modal-body    { padding: 16px 16px 24px; gap: 20px; }
+  .modal-step-title { font-size: 14px; }
+  .modal-step-desc  { font-size: 13px; }
+  .modal-step-num   { width: 32px; height: 32px; font-size: 11px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
