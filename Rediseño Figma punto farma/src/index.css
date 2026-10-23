@@ -466,6 +466,10 @@ ol, ul { list-style: none; padding: 0; margin: 0; }
 }
 
 @media (max-width: 600px) {
+  /* Scroll natural del navegador en móvil */
+  .app-shell  { height: auto; min-height: 100dvh; }
+  .bento-grid { flex: none; min-height: unset; }
+
   /* Header */
   .brand-logo    { height: 38px; }
   .header-inner  { padding: 6px 14px; gap: 12px; }
